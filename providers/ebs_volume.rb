@@ -7,6 +7,7 @@ def whyrun_supported?
 end
 
 action :create do
+  # TODO What is the impact if a snapshot is found, but the device is already attached?
   raise 'Cannot create a volume with a specific volume_id as AWS chooses volume ids' if new_resource.volume_id
   # If a snapshot ID was specified, or tag key/value pairs, attempt to find the snapshot. Specify if a snapshot is required or optional; if required,
   # a failure will occur if the snapshot is not found.
@@ -30,6 +31,8 @@ action :create do
     # TODO: determine whether this should be an error or just cause a new volume to be created. Currently erring on the side of failing loudly
     raise "Volume with id #{nvid} is registered with the node but does not exist in EC2. To clear this error, remove the ['aws']['ebs_volume']['#{new_resource.name}']['volume_id'] entry from this node's data." unless exists
   else
+    # TODO: If override_existing_volume is true and the volume is already attached, the existing volume needs to be detached.
+
     # Determine if there is a volume that meets the resource's specifications and is attached to the current
     # instance in case a previous [:create, :attach] run created and attached a volume but for some reason was
     # not registered in the node data (e.g. an exception is thrown after the attach_volume request was accepted
