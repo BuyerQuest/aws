@@ -45,18 +45,18 @@ module Opscode
         response = if find_most_recent
                      if search_tags.nil?
                        # Fall through to old / default / previous behavior
-                       ec2.describe_snapshots.sort { |a, b| a[:start_time] <=> b[:start_time] }
+                       ec2.describe_snapshots[:snapshots].sort { |a, b| b[:start_time] <=> a[:start_time] }
                      else
                        Chef::Log.debug("Filtering results using #{search_tags.inspect}")
-                       ec2.describe_snapshots(filters: search_tags).sort { |a, b| a[:start_time] <=> b[:start_time] }
+                       ec2.describe_snapshots(filters: search_tags)[:snapshots].sort { |a, b| b[:start_time] <=> a[:start_time] }
                      end
                    else
                      if search_tags.nil?
                        # Fall through to old / default / previous behavior
-                       ec2.describe_snapshots.sort { |a, b| b[:start_time] <=> a[:start_time] }
+                       ec2.describe_snapshots[:snapshots].sort { |a, b| a[:start_time] <=> b[:start_time] }
                      else
                        Chef::Log.debug("Filtering results using #{search_tags.inspect}")
-                       ec2.describe_snapshots(filters: search_tags).sort { |a, b| b[:start_time] <=> a[:start_time] }
+                       ec2.describe_snapshots(filters: search_tags)[:snapshots].sort { |a, b| a[:start_time] <=> b[:start_time] }
                      end
                    end
 
@@ -81,7 +81,7 @@ module Opscode
           fail 'Cannot find snapshot id!' unless snapshot_id
         end
 
-        Chef::Log.debug("Snapshot ID is #{snapshot_id}")
+        Chef::Log.info("Snapshot ID is #{snapshot_id}")
         snapshot_id
       end
 
