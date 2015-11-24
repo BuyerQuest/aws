@@ -88,11 +88,11 @@ module Opscode
         end
 
         if new_resource.attribute['region'] && !new_resource.region.nil?
-          Chef::Log.info("Retrieving availability zone from meta-data")
+          Chef::Log.info('Retrieving availability zone from meta-data')
           region = instance_availability_zone
           region = region[0, region.length - 1]
         else
-          Chef::Log.info("Using new_resource region setting")
+          Chef::Log.info('Using new_resource region setting')
           region = new_resource.region
         end
 
