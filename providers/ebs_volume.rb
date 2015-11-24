@@ -222,9 +222,10 @@ def create_volume(snapshot_id, size, availability_zone, timeout, volume_type, pi
 
     # Add the initial set of tags, if they were specified
     unless tags.nil?
+      Chef::Log.info("Creating tags on volume #{nv[:volume_id]}")
       tags.each do |k, v|
-        ec2.create_tags(resources: [nv], tags: [{ key: k, value: v }])
-        Chef::Log.info("AWS: Added tag '#{k}' with value '#{v}' on resource #{resource_id}")
+        ec2.create_tags(resources: [nv[:volume_id]], tags: [{ key: k, value: v }])
+        Chef::Log.info("AWS: Added tag '#{k}' with value '#{v}' on resource #{nv[:volume_id]}")
       end
     end
 
