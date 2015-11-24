@@ -59,7 +59,12 @@ action :create do
                              new_resource.volume_type,
                              new_resource.piops,
                              new_resource.encrypted,
-                             new_resource.kms_key_id)
+                             new_resource.kms_key_id,
+                             new_resource.tags)
+
+        # Setup the new volume to be deleted on system termination
+        mark_delete_on_termination(new_resource.device, vol[:volume_id], instance_id) if new_resource.delete_on_termination
+
         node.set['aws']['ebs_volume'][new_resource.name]['volume_id'] = nvid
         node.save unless Chef::Config[:solo]
       end
@@ -182,7 +187,7 @@ def volume_compatible_with_resource_definition?(volume)
 end
 
 # Creates a volume according to specifications and blocks until done (or times out)
-def create_volume(snapshot_id, size, availability_zone, timeout, volume_type, piops, encrypted, kms_key_id)
+def create_volume(snapshot_id, size, availability_zone, timeout, volume_type, piops, encrypted, kms_key_id, tags)
   availability_zone ||= instance_availability_zone
 
   # Sanity checks so we don't shoot ourselves.
@@ -224,6 +229,15 @@ def create_volume(snapshot_id, size, availability_zone, timeout, volume_type, pi
         end
       end
     end
+
+    # Add the initial set of tags, if they were specified
+    unless tags.nil?
+        tags.each do |k, v|
+            ec2.create_tags(resources: [nv], tags: [{ key: k, value: v }])
+            Chef::Log.info("AWS: Added tag '#{k}' with value '#{v}' on resource #{resource_id}")
+        end
+    end
+
   rescue Timeout::Error
     raise "Timed out waiting for volume creation after #{timeout} seconds"
   end
