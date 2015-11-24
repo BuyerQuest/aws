@@ -56,7 +56,12 @@ action :create do
                              new_resource.volume_type,
                              new_resource.piops,
                              new_resource.encrypted,
-                             new_resource.kms_key_id)
+                             new_resource.kms_key_id,
+                             new_resource.tags)
+
+        # Setup the new volume to be deleted on system termination
+        mark_delete_on_termination(new_resource.device, vol[:volume_id], instance_id) if new_resource.delete_on_termination
+
         node.set['aws']['ebs_volume'][new_resource.name]['volume_id'] = nvid
         node.save unless Chef::Config[:solo]
       end
@@ -82,6 +87,7 @@ action :attach do
     converge_by("attach the volume with aws_id=#{vol[:volume_id]} id=#{instance_id} device=#{new_resource.device} and update the node data with created volume's id") do
       # attach the volume and register its id in the node data
       attach_volume(vol[:volume_id], instance_id, new_resource.device, new_resource.timeout)
+      mark_delete_on_termination(new_resource.device, vol[:volume_id], instance_id) if new_resource.delete_on_termination
       # always use a symbol here, it is a Hash
       node.set['aws']['ebs_volume'][new_resource.name]['volume_id'] = vol[:volume_id]
       node.save unless Chef::Config[:solo]
@@ -168,7 +174,7 @@ def volume_compatible_with_resource_definition?(volume)
 end
 
 # Creates a volume according to specifications and blocks until done (or times out)
-def create_volume(snapshot_id, size, availability_zone, timeout, volume_type, piops, encrypted, kms_key_id)
+def create_volume(snapshot_id, size, availability_zone, timeout, volume_type, piops, encrypted, kms_key_id, tags)
   availability_zone ||= instance_availability_zone
 
   # Sanity checks so we don't shoot ourselves.
@@ -213,6 +219,15 @@ def create_volume(snapshot_id, size, availability_zone, timeout, volume_type, pi
         end
       end
     end
+
+    # Add the initial set of tags, if they were specified
+    unless tags.nil?
+        tags.each do |k, v|
+            ec2.create_tags(resources: [nv], tags: [{ key: k, value: v }])
+            Chef::Log.info("AWS: Added tag '#{k}' with value '#{v}' on resource #{resource_id}")
+        end
+    end
+
   rescue Timeout::Error
     raise "Timed out waiting for volume creation after #{timeout} seconds"
   end
@@ -286,4 +301,9 @@ def detach_volume(volume_id, timeout)
   rescue Timeout::Error
     raise "Timed out waiting for volume detachment after #{timeout} seconds"
   end
+end
+
+def mark_delete_on_termination(device_name, volume_id, instance_id)
+  Chef::Log.debug("Marking volume #{volume_id} with device name #{device_name} attached to instance #{instance_id} #{new_resource.delete_on_termination} for deletion on instance termination")
+  ec2.modify_instance_attribute(block_device_mappings: [{ device_name: device_name, ebs: { volume_id: volume_id, delete_on_termination: new_resource.delete_on_termination } }], instance_id: instance_id)
 end
