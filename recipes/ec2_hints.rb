@@ -1,4 +1,3 @@
-<<<<<<< a656d27933ec8b3fbcfbdc8564b8fd59671a4107
 #
 # Cookbook Name:: aws
 # Recipe:: ec2_hints
