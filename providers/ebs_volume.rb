@@ -24,6 +24,7 @@ action :create do
     vol = volume_by_id(nvid)
     exists = vol && vol[:state] != 'deleting'
 
+    # TODO: determine whether this should be an error or just cause a new volume to be created. Currently erring on the side of failing loudly
     raise "Volume with id #{nvid} is registered with the node but does not exist in EC2. To clear this error, remove the ['aws']['ebs_volume']['#{new_resource.name}']['volume_id'] entry from this node's data." unless exists
   else
     # Determine if there is a volume that meets the resource's specifications and is attached to the current
