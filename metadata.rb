@@ -1,5 +1,5 @@
-name 'aws'
-maintainer 'Chef Software, Inc.'
+name 'bq-aws'
+maintainer 'Chef Software, Inc'
 maintainer_email 'cookbooks@chef.io'
 license 'Apache 2.0'
 description 'Custom resources for managing AWS resources'

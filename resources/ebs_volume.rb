@@ -36,3 +36,7 @@ attribute :piops,                 kind_of: Integer, default: 0
 attribute :encrypted,             kind_of: [TrueClass, FalseClass], default: false
 attribute :kms_key_id,            kind_of: String
 attribute :delete_on_termination, kind_of: [TrueClass, FalseClass], default: false
+attribute :search_tags,               kind_of: [Array], default: nil
+attribute :require_existing_snapshot, kind_of: [TrueClass, FalseClass], default: true
+attribute :override_existing_volume,  kind_of: [TrueClass, FalseClass], default: false
+attribute :attach_existing,           kind_of: [TrueClass, FalseClass], default: false
