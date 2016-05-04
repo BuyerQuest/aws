@@ -60,16 +60,14 @@ module Opscode
                      end
                    end
 
-
-        response.each do |page|
-          page.snapshots.each do |snapshot|
-            Chef::Log.debug("Checking #{snapshot[:volume_id]} / #{snapshot[:snapshot_id]} for readiness / use against -#{volume_id}-")
-            # && snapshot_id.nil? is required to ensure only the first match is used, otherwise the last match is used.
-            if ((volume_id == '' && !search_tags.nil?) || (snapshot[:volume_id] == volume_id)) && snapshot[:state] == 'completed' && snapshot_id.nil?
-              snapshot_id = snapshot[:snapshot_id]
-            else
-              Chef::Log.info("Not using VolumeID: #{volume_id}/#{volume_id.nil?}; Search Tags: #{search_tags.inspect}; Snapshot Volume ID: #{snapshot[:volume_id]}; Snapshot State: #{snapshot[:state]}")
-            end
+        # Because the response is already a sorted array of snapshots, there is no need to iterate through each page in the response.
+        response.each do |snapshot|
+          Chef::Log.debug("Checking #{snapshot[:volume_id]} / #{snapshot[:snapshot_id]} for readiness / use against -#{volume_id}-")
+          # && snapshot_id.nil? is required to ensure only the first match is used, otherwise the last match is used.
+          if ((volume_id == '' && !search_tags.nil?) || (snapshot[:volume_id] == volume_id)) && snapshot[:state] == 'completed' && snapshot_id.nil?
+            snapshot_id = snapshot[:snapshot_id]
+          else
+            Chef::Log.info("Not using VolumeID: #{volume_id}/#{volume_id.nil?}; Search Tags: #{search_tags.inspect}; Snapshot Volume ID: #{snapshot[:volume_id]}; Snapshot State: #{snapshot[:state]}")
           end
         end
 
