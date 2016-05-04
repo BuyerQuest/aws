@@ -60,7 +60,6 @@ module Opscode
                      end
                    end
 
-        end
 
         response.each do |page|
           page.snapshots.each do |snapshot|
