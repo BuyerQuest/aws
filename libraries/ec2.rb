@@ -69,7 +69,7 @@ module Opscode
             if ((volume_id == '' && !search_tags.nil?) || (snapshot[:volume_id] == volume_id)) && snapshot[:state] == 'completed' && snapshot_id.nil?
               snapshot_id = snapshot[:snapshot_id]
             else
-              Chef::Log.info("Not using VolumeID: #{volume_id}/#{volume_id.nil?}; Search Tags: #{search_tags.inspect}; Snapshot Volume ID: #{snapshot[:volume_id]}; Snapshot State: #{snapshot[:state]}")
+              Chef::Log.debug("Not using VolumeID: #{volume_id == '' ? 'unset' : volume_id}; Search Tags: #{search_tags.inspect}; Snapshot #{snapshot[:snapshot_id]} from Volume ID: #{snapshot[:volume_id]}; Snapshot State: #{snapshot[:state]}")
             end
           end
         end

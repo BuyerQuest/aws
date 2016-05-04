@@ -257,7 +257,47 @@ Manage Elastic Block Store (EBS) volumes with this resource.
 
 Manage Elastic Block Store (EBS) raid devices with this resource. This resource is linux specific and creates a mdadm array using EBS volumes.
 
+<<<<<<< HEAD
 #### Actions:
+=======
+* `create` - create a new volume.
+* `attach` - attach the specified volume.
+* `detach` - detach the specified volume.
+* `snapshot` - create a snapshot of the volume.
+* `prune` - prune snapshots.
+
+Attribute Parameters:
+
+* `aws_secret_access_key`, `aws_access_key` and optionally `aws_session_token` - passed to
+  `Opscode::AWS:Ec2` to authenticate required, unless using IAM roles for authentication.
+* `size` - size of the volume in gigabytes.
+* `snapshot_id` - snapshot to build EBS volume from.
+* most_recent_snapshot - use the most recent snapshot when creating a
+   volume from an existing volume (defaults to false)
+* `availability_zone` - EC2 region, and is normally automatically
+  detected.
+* `device` - local block device to attach the volume to, e.g.
+  `/dev/sdi` but no default value, required.
+* `volume_id` - specify an ID to attach, cannot be used with action
+  `:create` because AWS assigns new volume IDs
+* `timeout` - connection timeout for EC2 API.
+* `snapshots_to_keep` - used with action `:prune` for number of
+  snapshots to maintain.
+* `description` - used to set the description of an EBS snapshot
+* `volume_type` - "standard", "io1", or "gp2" ("standard" is magnetic, "io1" is piops SSD, "gp2" is general purpose SSD)
+* `piops` - number of Provisioned IOPS to provision, must be >= 100
+* `existing_raid` - whether or not to assume the raid was previously assembled on existing volumes (default no)
+* `encrypted` - specify if the EBS should be encrypted
+* `kms_key_id` - the full ARN of the AWS Key Management Service (AWS KMS) master key to use when creating the encrypted volume (defaults to master key if not specified)
+* `delete_on_termination` - Boolean value to control whether or not the volume should be deleted when the instance it's attached to is terminated (defaults to nil).  Only applies to :attach action.
+* `search_tags` - tags associated to the snapshot that allow searching for a snapshot dynamically
+ rather than specifying a snapshot_id; if both snapshot_id and search_tags are specified, the search_tags will take precedence
+* `tags` - tags to be initially assigned to a new volume; this is setup as a helper because tags are not easily added to a newly created volume as the
+ volume_id is not available during convergence
+* `require_existing_snapshot` - if attempting to attach a volume from a snapshot, fail if a matching snapshot cannot be found (defaults to true)
+* `override_existing_volume` - if an existing volume is specified in the node metadata but does not exist, then create a new volume (defaults to false)
+* `attach_existing` - if an existing volume is specified in the node metadata, attach that volume if it exists; fail if it does not exist (defaults to true)
+>>>>>>> 6c7c2e814b641b09aac19968764921ec0a4c3b6c
 
 - `auto_attach` - create / mount raid array
 
